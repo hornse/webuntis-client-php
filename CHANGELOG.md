@@ -1,5 +1,11 @@
 # Changelog – webuntis-client-php
 
+## v1.1.0 (Juli 2026)
+
+- Extraktoren zählen Vorkommen: fachKuerzel/paareExplizit/paare liefern
+  Anzahl statt true (rückwärtskompatibel über array_keys) – Grundlage für
+  Stunden-Signale wie „Facultas vs. Vertretung"
+
 ## v1.0.0 (Juli 2026)
 
 - WebUntisAuth: offizielle JSON-RPC-API (authenticate, getTeachers,
