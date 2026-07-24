@@ -97,6 +97,24 @@ verworfen.
 
 ---
 
+## In den Abschnitt „WebUntisAuth" ergänzen
+
+### `getKlassen(): array` und `getStudents(): array` *(ab v1.4.0)*
+
+Stammdaten-Abrufe über JSON-RPC, analog zu `getTeachers()`:
+
+```php
+$klassen  = $wu->getKlassen();    // [['id'=>42,'name'=>'6b', …], …]
+$schueler = $wu->getStudents();   // [['id'=>13914,'name'=>…, …], …]
+```
+
+> **Datenschutz:** `getStudents()` liefert die gesamte Schülerschaft mit
+> Klarnamen. Nur die benötigten Felder weiterverarbeiten (meist `id` und
+> `klasseId`), Namen nicht speichern, wenn IDs genügen, und die Antwort
+> nicht in Logs oder Diagnoseberichte schreiben.
+
+---
+
 ## In den Abschnitt „WebUntisRest" ergänzen
 
 ### `post(string $pfad, array $daten): array` *(ab v1.3.0)*

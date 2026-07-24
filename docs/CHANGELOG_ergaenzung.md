@@ -4,6 +4,59 @@ Diese Einträge oben in die bestehende `CHANGELOG.md` einfügen.
 
 ---
 
+## v1.5.0 (Juli 2026)
+
+### Neu
+- `WebUntisAuth::getSchoolyears()` – alle Schuljahre mit id, name,
+  startDate, endDate.
+- `WebUntisAuth::getCurrentSchoolyear()` – aktuelles Schuljahr oder `[]`.
+  Fängt den Fehler -8998 ab, der zwischen zwei Schuljahren auftritt.
+- `WebUntisAuth::getKlassen()` nimmt jetzt optional eine `schoolyearId`.
+
+### Erkenntnis aus der Praxis
+In den Sommerferien ist **kein Schuljahr aktiv**. Aufrufe, die sich implizit
+auf das aktuelle Schuljahr beziehen (z. B. `getKlassen()` ohne Parameter),
+scheitern dann mit:
+
+```
+WebUntis-Fehler -8998: Cannot invoke
+"com.grupet.web.basic.Schoolyear.getEndDate()" because "schoolyear" is null
+```
+
+Wer ganzjährig zuverlässig arbeiten muss, sollte die Schuljahres-ID
+explizit übergeben.
+
+---
+
+## v1.4.0 (Juli 2026)
+
+### Neu
+- `WebUntisAuth::getKlassen()` – alle Klassen.
+- `WebUntisAuth::getStudents()` – alle Schüler:innen.
+
+### Hinweis
+`getStudents()` liefert je Eintrag nur `id`, `key`, `name`, `foreName`,
+`longName`, `gender` – **keine Klassen- oder Jahrgangszuordnung** und keine
+Gruppenzugehörigkeit. Für Zuordnungen dieser Art führt kein Weg an den
+Stundenplänen vorbei.
+
+---
+
+## v1.4.0 (Juli 2026)
+
+### Neu
+- `WebUntisAuth::getKlassen()` – Klassenliste des aktuellen Schuljahres.
+- `WebUntisAuth::getStudents()` – alle Schüler:innen mit `id`, `key`,
+  `name`, `foreName`, `longName` und je nach Instanz weiteren Feldern.
+
+### Datenschutzhinweis
+`getStudents()` liefert die gesamte Schülerschaft mit Klarnamen. Aufrufer
+sollten nur die benötigten Felder verarbeiten (meist `id` und `klasseId`),
+Namen nicht dauerhaft speichern, wenn IDs ausreichen, und die Antwort
+nicht in Logs oder Diagnoseberichte schreiben.
+
+---
+
 ## v1.3.0 (Juli 2026)
 
 ### Neu
