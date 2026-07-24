@@ -57,7 +57,15 @@ pruefe('Vertretung (SUBSTITUTION) NICHT gewertet', !in_array('Ve', $kuerzel, tru
 pruefe('CHANGED NICHT gewertet',                   !in_array('Ch', $kuerzel, true));
 pruefe('Pausenaufsicht NICHT gewertet',            !in_array('Au', $kuerzel, true));
 pruefe('EVENT NICHT gewertet',                     !in_array('Ev', $kuerzel, true));
-pruefe('EXAM NICHT gewertet',                      !in_array('Ex', $kuerzel, true));
+// Ab v1.6.0: EXAM/REGULAR wird bewusst gewertet (Fachlehrkraft
+// beaufsichtigt eigene Arbeiten). Abschaltbar über den zweiten Parameter.
+pruefe('EXAM/REGULAR wird gewertet (ab v1.6.0)', in_array('Ex', $kuerzel, true));
+pruefe('EXAM zählt NICHT als Unterrichtsstunde',
+    ($ex['lehrkraefte']['Ex']['stunden'] ?? -1) === 0);
+pruefe('EXAM getrennt gezählt',
+    ($ex['lehrkraefte']['Ex']['klausuren'] ?? 0) === 1);
+pruefe('abschaltbar über zweiten Parameter',
+    !isset(rest_lehrkraefte_aus_entries($plan, false)['lehrkraefte']['Ex']));
 pruefe('Ausfall (CANCELLED) GEWERTET',              in_array('Kl', $kuerzel, true));
 pruefe('reguläre Lehrkraft gewertet',               in_array('Gr', $kuerzel, true));
 
@@ -68,7 +76,8 @@ pruefe('Fächer je Lehrkraft',
     array_keys($ex['lehrkraefte']['Gr']['faecher']) === ['M', 'D']);
 pruefe('Fachhäufigkeit gezählt',    $ex['lehrkraefte']['Gr']['faecher']['M'] === 1);
 pruefe('Langname übernommen',       $ex['lehrkraefte']['Gr']['name'] === 'Greitemann');
-pruefe('gewertete Einträge gezählt', $ex['eintraege'] === 3);
+pruefe('gewertete Einträge gezählt (3 Unterricht + 1 Klausur)',
+    $ex['eintraege'] === 4);
 
 echo "rest_lehrkraefte_aus_entries – Sonderfälle\n";
 // Kopplung: zwei Lehrkräfte in einem Eintrag

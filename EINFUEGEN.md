@@ -1,16 +1,17 @@
 # Änderungen am webuntis-client-php – Übersicht
 
 Alle Änderungen, die aus dem Projekt `sprechtag` ins Modul-Repository
-zurückfließen sollen. Stand: 24.07.2026, Zielversion **1.5.0**.
+zurückfließen sollen. Stand: 24.07.2026, Zielversion **1.6.0**.
 
 ## Auf einen Blick
 
 | Datei im Repo | Änderung | Version | Quelle in diesem Paket |
 |---|---|---|---|
-| `src/extractors.php` | 2 Funktionen **anhängen** | 1.2.0 | `src/extractors_ergaenzung_v1.2.0.php` |
+| `src/extractors.php` | 2 Funktionen **anhängen** | 1.2.0 / 1.6.0 | `src/extractors_ergaenzung_v1.6.0.php` |
 | `src/WebUntisRest.php` | 1 Eigenschaft, 2 Methoden, 1 Zeile ändern | 1.3.0 | `src/WebUntisRest_ergaenzung_v1.3.0.md` |
 | `src/WebUntisAuth.php` | 4 Methoden ergänzen | 1.4.0 / 1.5.0 | `src/WebUntisAuth_ergaenzung_v1.5.0.md` |
 | `tests/extractors_lehrkraefte_test.php` | **neu** | 1.2.0 | `tests/extractors_lehrkraefte_test.php` |
+| `tests/extractors_klausuren_test.php` | **neu** | 1.6.0 | `tests/extractors_klausuren_test.php` |
 | `README.md` | Abschnitte ergänzen | – | `docs/README_ergaenzung.md` |
 | `CHANGELOG.md` | 4 Einträge ergänzen | – | `docs/CHANGELOG_ergaenzung.md` |
 
@@ -22,7 +23,7 @@ vorhandene Aufrufe nicht bricht.
 
 ### 1. `src/extractors.php` (→ v1.2.0)
 
-Aus `src/extractors_ergaenzung_v1.2.0.php` **alles ab der ersten
+Aus `src/extractors_ergaenzung_v1.6.0.php` **alles ab der ersten
 `/**`-Zeile** ans Ende anhängen; den `<?php`-Kopf nicht mitkopieren.
 
 Neu: `rest_lehrkraefte_aus_entries()`, `rest_konto_aus_appdata()`.
@@ -49,9 +50,10 @@ ohne ihn scheitert der Aufruf in den Sommerferien.
 
 ```bash
 php tests/extractors_lehrkraefte_test.php   # Exit-Code 0 = grün
+php tests/extractors_klausuren_test.php
 ```
 
-34 Prüfungen, ohne Netz und Datenbank lauffähig.
+36 + 14 Prüfungen, ohne Netz und Datenbank lauffähig.
 
 ### 5. Dokumentation
 
@@ -62,10 +64,10 @@ Endpunkte, die personType-Werte und den Ferien-Fallstrick.
 ### 6. Version und Freigabe
 
 ```bash
-# composer.json bzw. Versionskonstante auf 1.5.0
+# composer.json bzw. Versionskonstante auf 1.6.0
 git add -A
-git commit -m "v1.5.0: Schuljahre, Klassen/Schueler, POST, Lehrkraft-Extraktor"
-git tag v1.5.0
+git commit -m "v1.6.0: Klausur-Auswertung, Schuljahre, Klassen/Schueler, POST"
+git tag v1.6.0
 git push && git push --tags
 ```
 

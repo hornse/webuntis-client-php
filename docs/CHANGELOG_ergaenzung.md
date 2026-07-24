@@ -4,6 +4,33 @@ Diese Einträge oben in die bestehende `CHANGELOG.md` einfügen.
 
 ---
 
+## v1.6.0 (Juli 2026)
+
+### Geändert
+- `rest_lehrkraefte_aus_entries()` nimmt einen zweiten Parameter
+  `$mitKlausuren` (Standard `true`) und wertet dann zusätzlich Einträge
+  vom Typ `EXAM` mit Status `REGULAR`.
+- Die Rückgabe enthält je Lehrkraft ein neues Feld `klausuren`.
+  Klausurstunden zählen **nicht** in `stunden`, damit die Sortierung nach
+  regulärem Unterricht erhalten bleibt.
+
+Bestehende Aufrufe funktionieren unverändert; die Voreinstellung ändert
+allerdings das Ergebnis. Wer das alte Verhalten braucht, übergibt `false`.
+
+### Erkenntnis aus der Praxis
+In Unter- und Mittelstufe beaufsichtigen Fachlehrkräfte ihre eigenen
+Klassenarbeiten. Fällt der reguläre Unterricht im Abfragezeitraum aus oder
+wird vertreten, ist der Klausurtermin der einzige Beleg für die Zuordnung
+Lehrkraft↔Kind. Ein Beispiel aus der Praxis: Bei einem Schüler war die
+Informatik-Lehrkraft in einer Woche vertreten und schrieb in der nächsten
+eine Arbeit – ohne `EXAM`-Auswertung fiel sie komplett heraus, obwohl sie
+das Fach durchgängig unterrichtet.
+
+`EXAM / CHANGED` bleibt ausgeschlossen: Bei verlegten Arbeiten steht die
+Lehrkraft nur unter `removed`.
+
+---
+
 ## v1.5.0 (Juli 2026)
 
 ### Neu

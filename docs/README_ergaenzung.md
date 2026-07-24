@@ -6,7 +6,7 @@ Diese Abschnitte in die bestehende `README.md` einfügen.
 
 ## In den Abschnitt „Extraktoren" ergänzen
 
-### `rest_lehrkraefte_aus_entries($json): array` *(ab v1.2.0)*
+### `rest_lehrkraefte_aus_entries($json, bool $mitKlausuren = true): array` *(ab v1.2.0, Parameter ab v1.6.0)*
 
 Gegenstück zu `rest_unterricht_aus_entries()`. Beide werten dieselbe
 Antwort von `/timetable/entries` aus, aber aus entgegengesetzter Richtung:
@@ -29,15 +29,24 @@ $ex = rest_lehrkraefte_aus_entries($r['json']);
 
 // $ex['eintraege']   -> 42   (Zahl gewerteter Unterrichtsstunden)
 // $ex['lehrkraefte'] -> [
-//   'Gr' => ['name' => 'Greitemann', 'stunden' => 8,
+//   'Gr' => ['name' => 'Greitemann', 'stunden' => 8, 'klausuren' => 0,
 //            'faecher' => ['M' => 4, 'WP' => 4]],
-//   'Kl' => ['name' => 'Klein',      'stunden' => 3,
+//   'Kl' => ['name' => 'Klein',      'stunden' => 3, 'klausuren' => 1,
 //            'faecher' => ['E' => 3]],
 // ]
 ```
 
 Das Ergebnis ist **nach Stundenzahl absteigend sortiert** – Hauptfach-
 lehrkräfte stehen also oben, was sich gut für Auswahllisten eignet.
+
+**Klausuren** (ab v1.6.0): Mit `$mitKlausuren = true` (Standard) werden
+zusätzlich `EXAM`-Einträge mit Status `REGULAR` gewertet – in Unter- und
+Mittelstufe beaufsichtigen Fachlehrkräfte ihre eigenen Arbeiten, und ohne
+diese Einträge fällt eine Lehrkraft heraus, deren regulärer Unterricht im
+Abfragezeitraum vertreten wurde. Klausurstunden zählen getrennt in
+`klausuren` und **nicht** in `stunden`, damit die Sortierung nach
+regulärem Unterricht erhalten bleibt. Wo Aufsichten fachfremd verteilt
+werden, mit `false` abschalten.
 
 **Filterregeln** (identisch zu `rest_unterricht_aus_entries()`):
 
