@@ -1,5 +1,7 @@
 # webuntis-client-php
 
+**Version 1.7.0** · GPL-3.0-or-later
+
 Framework-freier PHP-Client (PHP 8.1+, nur cURL) für WebUntis:
 
 - **`WebUntisAuth`** – offizielle **JSON-RPC-API** (`/WebUntis/jsonrpc.do`):
@@ -8,7 +10,10 @@ Framework-freier PHP-Client (PHP 8.1+, nur cURL) für WebUntis:
   mit personId = -1).
 - **`WebUntisRest`** – **interne REST-API** (⚠️ undokumentiert): JWT via
   `/api/token/new`, Bearer-Aufrufe auf `/api/rest/view/v1/...` und den
-  Legacy-Endpunkt `/api/public/timetable/weekly/data`.
+  Legacy-Endpunkt `/api/public/timetable/weekly/data`. `get()`, `post()`,
+  `postMultipart()`; eigene Kopfzeilen für alle drei über
+  `setzeKopfzeile($name, $wert)` (z. B. für
+  `X-Webuntis-Api-School-Year-Id`, siehe Tabelle unten).
 - **`src/extractors.php`** – Auswertungsfunktionen, u. a. „welche Lehrkraft
   unterrichtet welches Fach" aus Stundenplan-Antworten.
 
@@ -75,11 +80,13 @@ Aus der Sondierung gegen eine produktive Instanz (frg-dusseldorf, 07/2026):
 | dito, Antwortstruktur | `{format, days, errors}`; Einträge haben `position1..7`, jedes Element trägt **`current.type`** (`CLASS`/`SUBJECT`/`ROOM`/`TEACHER`) – Positionen NIE fest interpretieren, immer den Typ lesen. `type` des Eintrags z. B. `NORMAL_TEACHING_PERIOD`; Nicht-Unterricht (Aufsichten, Konferenzen, Events) darüber filtern. |
 | dito, Batch | `resources=1,2` wird akzeptiert (200), aber die Einträge tragen **keine Zuordnung zur angefragten Ressource** → für Ableitungen je Lehrkraft einzeln abfragen. |
 | `GET /api/public/timetable/weekly/data` | Legacy, stabil: `?elementType=2&elementId=<id>&date=YYYY-MM-DD&formatId=1`, eine Woche je Aufruf. Perioden unter `data.result.data.elementPeriods` mit `elements[{type,id,orgId}]` (type 2 = Lehrer, 3 = Fach); bei Vertretung steht die reguläre Lehrkraft in `orgId`. |
+| Schuljahresabhängige Pfade (z. B. `/v1/students`) | Die Weboberfläche schickt bei jedem Stundenplanaufruf `X-Webuntis-Api-School-Year-Id` mit. Zwischen zwei Schuljahren ist keines aktiv (`currentSchoolYear: null`); ohne die Kopfzeile bricht die Auswertung solcher Pfade dann ab. Setzbar über `setzeKopfzeile()`. Belegt am 18.08.2026. |
 
 ## Tests
 
 ```bash
-php tests/run.php    # offline, keine Instanz nötig
+php tests/run.php               # offline, keine Instanz nötig
+php tests/webuntis_rest_test.php  # offline, prüft setzeKopfzeile()
 ```
 
 ## Lizenz
