@@ -90,5 +90,63 @@ pruefe(($w['namen'][2][1744] ?? '') === 'ho' && ($w['namen'][3][3] ?? '') === 'M
     'weekly: Namensauflösung');
 
 // ------------------------------------------------------------
+// 4. Optionale Methoden: is_callable(), nicht method_exists()
+//    method_exists() meldet auch PRIVATE Methoden als vorhanden.
+//    Eine Wache damit laesst den Aufruf durch, er wirft einen Error,
+//    ein catch (Throwable) faengt ihn - und die Anwendung meldet
+//    "WebUntis nicht erreichbar", ohne je verbunden zu haben.
+//    (Befund A9, hornse/koordination, 24.09.2026)
+// ------------------------------------------------------------
+require_once __DIR__ . '/../src/WebUntisRest.php';
+
+// 4a. Kein Aufruf von method_exists im Code des Moduls. Der
+//     Tokenizer trennt Kommentar und Zeichenkette vom Code - sonst
+//     schluege die Pruefung auf die Begruendung an.
+$codeDateien = array_merge(glob(__DIR__ . '/../src/*.php') ?: [],
+                           glob(__DIR__ . '/../beispiele/*.php') ?: []);
+pruefe(count($codeDateien) > 0, 'Code des Moduls gefunden (' . count($codeDateien) . ' Dateien)');
+$mitMethodExists = [];
+foreach ($codeDateien as $datei) {
+    foreach (token_get_all((string)file_get_contents($datei)) as $t) {
+        if (is_array($t) && $t[0] === T_STRING && strtolower($t[1]) === 'method_exists') {
+            $mitMethodExists[] = basename($datei) . ':' . $t[2];
+        }
+    }
+}
+pruefe($mitMethodExists === [],
+    'kein method_exists im Code des Moduls' . ($mitMethodExists ? ' – gefunden: ' . implode(', ', $mitMethodExists) : ''));
+
+// 4b. Die Tatsache, auf der die Empfehlung beruht - am echten
+//     rohGet(). Wird rohGet() oeffentlich, stimmt das Beispiel in
+//     der README nicht mehr, und das soll hier auffallen.
+$restProbe = new WebUntisRest('https://x.invalid', 'y');
+pruefe(method_exists($restProbe, 'rohGet') === true,
+    'method_exists meldet die private rohGet() als vorhanden');
+pruefe(is_callable([$restProbe, 'rohGet']) === false,
+    'is_callable meldet die private rohGet() als nicht aufrufbar');
+pruefe(is_callable([$restProbe, 'tokenHolen']) === true,
+    'GEGENPROBE: bei der öffentlichen tokenHolen() sagt is_callable ja');
+
+// 4c. Die Empfehlung in der README. Gesucht wird im Abschnitt, und
+//     fuer das Muster in den Codebloecken - die Prosa darf
+//     method_exists nennen, sie erklaert ja, warum nicht.
+$readme = (string)file_get_contents(__DIR__ . '/../README.md');
+$abschnitt = '';
+if (preg_match('/^### Optionale Methoden\b.*?(?=^#)/ms', $readme, $m)) {
+    $abschnitt = $m[0];
+}
+pruefe($abschnitt !== '', 'README: Abschnitt „Optionale Methoden" vorhanden');
+preg_match_all('/^```[a-z]*\n(.*?)^```/ms', $abschnitt, $bl);
+$abschnittCode = implode("\n", $bl[1]);
+pruefe(str_contains($abschnittCode, "is_callable([\$rest, 'rohGet'])"),
+    'README: Codebeispiel prüft mit is_callable am Beispiel rohGet()');
+preg_match_all('/^```[a-z]*\n(.*?)^```/ms', $readme, $alle);
+pruefe(count($alle[1]) > 0 && !str_contains(implode("\n", $alle[1]), 'method_exists'),
+    'README: kein method_exists in einem Codeblock (' . count($alle[1]) . ' Blöcke)');
+pruefe(str_contains($abschnitt, '`Error`') && str_contains($abschnitt, 'catch (Throwable')
+       && str_contains($abschnitt, 'nicht erreichbar'),
+    'README: die Folge ist genannt (Error, catch (Throwable), „nicht erreichbar")');
+
+// ------------------------------------------------------------
 echo "\n" . ($fehler === 0 ? 'ALLE TESTS BESTANDEN' : "$fehler TEST(S) FEHLGESCHLAGEN") . "\n";
 exit($fehler === 0 ? 0 : 1);

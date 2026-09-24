@@ -1,5 +1,21 @@
 # Changelog – webuntis-client-php
 
+## Ohne Versionsnummer (24.09.2026)
+
+Das Repo führt keine Tags; die Vergabe einer Nummer ist Teil eines
+offenen Vorgangs. Diese Änderung bleibt deshalb ohne Versionsangabe.
+
+- **README, Abschnitt „Optionale Methoden"**: Optionale Methoden einer
+  vendorten Kopie mit `is_callable()` prüfen, nicht mit
+  `method_exists()` — letzteres meldet auch die private `rohGet()` als
+  vorhanden. Folge einer solchen Wache: `Error`, gefangen von
+  `catch (Throwable)`, gemeldet als „nicht erreichbar". Anlass: Befund
+  A9 in `hornse/koordination`.
+- `tests/run.php`: 9 → 18 Prüfungen. Neu: kein `method_exists` im Code
+  des Moduls (Tokenizer, Kommentare und Zeichenketten ausgenommen),
+  `rohGet()` ist privat, die README-Empfehlung steht im Codeblock und
+  nennt die Folge. Sieben Gegenproben gefahren, alle angeschlagen.
+
 ## v1.7.0 (August 2026)
 
 - **`WebUntisRest::setzeKopfzeile($name, $wert)`** – eigene Kopfzeile für

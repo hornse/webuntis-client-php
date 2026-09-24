@@ -33,6 +33,31 @@ require 'src/extractors.php';
 
 Mit Composer: `composer require hornse/webuntis-client-php` (classmap).
 
+### Optionale Methoden: `is_callable()`, nicht `method_exists()`
+
+Wer eine vendorte Kopie auf eine Methode prüft, die nicht jede Fassung
+führt, fragt mit `is_callable()`:
+
+```php
+// rohGet() ist private. Von außen gefragt:
+is_callable([$rest, 'rohGet']);   // false – nicht aufrufbar
+```
+
+**`method_exists()` meldet auch private Methoden als vorhanden** —
+`method_exists($rest, 'rohGet')` liefert `true`. Eine Prüfung auf
+**Vorhandensein** ist keine auf **Benutzbarkeit**.
+
+Die Folge schickt die Fehlersuche in die falsche Richtung: Die Wache
+lässt den Aufruf durch, er wirft einen `Error` (keine `Exception`), ein
+`catch (Throwable $e)` fängt ihn — und die Anwendung meldet „WebUntis
+nicht erreichbar". Eine Verbindung wurde nie versucht. In einem Projekt
+hat das zwei Tage Suche an der falschen Stelle gekostet.
+
+Bei öffentlichen Methoden wie `setzeTimeout()` liefern beide dasselbe;
+gerade deshalb fällt der Unterschied erst bei einer privaten auf.
+`tests/run.php` hält fest, dass `rohGet()` privat ist und im Code des
+Moduls kein `method_exists` steht.
+
 ## Schnellstart: Lehrer-Fach-Zuordnung ermitteln
 
 ```php
