@@ -31,7 +31,7 @@ und wird in die Anwendungen **vendored** — kopiert, nicht eingebunden.
 |---|---|
 | Inhalt | `src/WebUntisRest.php`, `src/WebUntisAuth.php`, `src/extractors.php` |
 | Remote | `github` → **`hornse/webuntis-client-php`** |
-| Testskript | **keines** |
+| Testskripte | vier Dateien in `tests/`, **zwei davon rot** — siehe „Was offen ist" |
 | Lizenz | GPL-3.0-or-later |
 
 ## Der Verzeichnisname weicht vom Repo-Namen ab
@@ -42,6 +42,24 @@ Repo-Namen schließt, liegt hier falsch — der Bestandslauf löst deshalb
 über die Git-Remotes auf, nicht über den Ordner.
 
 ## Was offen ist
+
+**Zwei der vier Testdateien sind rot, und zwar seit sie aufgenommen
+wurden.** Stand 24.09.2026, jede Datei einzeln mit `php` aufgerufen:
+
+| Datei | Ergebnis |
+|---|---|
+| `tests/run.php` | grün (18 Prüfungen) |
+| `tests/webuntis_rest_test.php` | grün (8 Prüfungen) |
+| `tests/extractors_lehrkraefte_test.php` | **rot**: Fatal, `rest_lehrkraefte_aus_entries()` undefiniert |
+| `tests/extractors_klausuren_test.php` | **rot**: dito |
+
+Die Funktion steht nur in den Ergänzungsdateien und nicht in
+`src/extractors.php`. Die Tests sind hereingekommen, der Code nicht.
+**Die roten Tests werden nicht einzeln repariert.** Sie gehören zur
+Zusammenführung von `WebUntisAuth` und `extractors.php` (unten).
+**Kein Skript lässt alle vier laufen**, und die README nennt nur die
+beiden grünen. Wer nur „die Tests" laufen lässt, sieht deshalb grün.
+Befund: `hornse/koordination`, `docs/BEFUND-2026-09-24-webuntis-holen.md`.
 
 **Dieses Repo führt keine Tags.** Ein Rückstand einer Kopie lässt sich
 deshalb nur auf ein **Datum** beziehen, nicht auf eine Versionsnummer.
