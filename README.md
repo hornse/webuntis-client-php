@@ -33,7 +33,32 @@ require 'src/extractors.php';
 
 Mit Composer: `composer require hornse/webuntis-client-php` (classmap).
 
-### Optionale Methoden: `is_callable()`, nicht `method_exists()`
+### Was `WebUntisRest` seit dem Rückfluss führt — keine Wache nötig
+
+**Seit dem 25.08.2026** (`6cd8afd`, in der Commit-Meldung als v1.7.0
+bezeichnet) stehen diese Methoden im **Code** von
+`src/WebUntisRest.php`:
+
+`setzeTimeout()` · `setzeKopfzeile()` · `jwtDaten()` · `jwtScopes()` ·
+`post()` · `postMultipart()` · `empfaengerSuchen()` ·
+`listeAufloesen()`
+
+**Alle sind `public`.** Wer sie aufruft, braucht keine Wache — eine
+Prüfung, deren Antwort feststeht, ist keine.
+
+> **Achtung bei der Datierung.** `git log -S 'function setzeTimeout'`
+> nennt **ohne** Pfadfilter zusätzlich v1.3.0 (23.07.2026). Dort stand
+> die Methode aber nur in `src/WebUntisRest_ergaenzung_v1.3.0.md` —
+> einer **Anleitungsdatei**, nicht in lauffähigem PHP. Der Rückfluss
+> in den Code fand erst am 25.08.2026 statt. Wer die Nummer aus dem
+> Commit-Titel übernimmt, nennt eine Fassung, in der der Code die
+> Methode nicht hatte.
+
+Und weil dieses Repo **keine Tags führt** und die Nummern in den
+Commit-Meldungen nicht durchgängig zum Inhalt passen, ist das **Datum**
+die tragfähigere Angabe — die Nummer steht daneben, nicht dafür.
+
+### Wirklich optionale Methoden: `is_callable()`, nicht `method_exists()`
 
 Wer eine vendorte Kopie auf eine Methode prüft, die nicht jede Fassung
 führt, fragt mit `is_callable()`:
@@ -53,8 +78,11 @@ lässt den Aufruf durch, er wirft einen `Error` (keine `Exception`), ein
 nicht erreichbar". Eine Verbindung wurde nie versucht. In einem Projekt
 hat das zwei Tage Suche an der falschen Stelle gekostet.
 
-Bei öffentlichen Methoden wie `setzeTimeout()` liefern beide dasselbe;
-gerade deshalb fällt der Unterschied erst bei einer privaten auf.
+Bei einer öffentlichen Methode liefern beide dasselbe; gerade deshalb
+fällt der Unterschied erst bei einer privaten auf. **`setzeTimeout()`
+ist dafür kein Beispiel mehr** — sie ist seit dem Rückfluss Bestand
+(siehe oben), und eine Wache davor beantwortet eine Frage, deren
+Antwort feststeht.
 `tests/run.php` hält fest, dass `rohGet()` privat ist und im Code des
 Moduls kein `method_exists` steht.
 

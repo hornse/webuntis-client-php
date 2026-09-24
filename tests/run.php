@@ -132,10 +132,10 @@ pruefe(is_callable([$restProbe, 'tokenHolen']) === true,
 //     method_exists nennen, sie erklaert ja, warum nicht.
 $readme = (string)file_get_contents(__DIR__ . '/../README.md');
 $abschnitt = '';
-if (preg_match('/^### Optionale Methoden\b.*?(?=^#)/ms', $readme, $m)) {
+if (preg_match('/^### Wirklich optionale Methoden\b.*?(?=^#)/ms', $readme, $m)) {
     $abschnitt = $m[0];
 }
-pruefe($abschnitt !== '', 'README: Abschnitt „Optionale Methoden" vorhanden');
+pruefe($abschnitt !== '', 'README: Abschnitt „Wirklich optionale Methoden" vorhanden');
 preg_match_all('/^```[a-z]*\n(.*?)^```/ms', $abschnitt, $bl);
 $abschnittCode = implode("\n", $bl[1]);
 pruefe(str_contains($abschnittCode, "is_callable([\$rest, 'rohGet'])"),
@@ -146,6 +146,48 @@ pruefe(count($alle[1]) > 0 && !str_contains(implode("\n", $alle[1]), 'method_exi
 pruefe(str_contains($abschnitt, '`Error`') && str_contains($abschnitt, 'catch (Throwable')
        && str_contains($abschnitt, 'nicht erreichbar'),
     'README: die Folge ist genannt (Error, catch (Throwable), „nicht erreichbar")');
+
+// 4d. Die ZUSAGE der README: acht Methoden, alle oeffentlich.
+//
+//     ANLASS (M40): Eine Anleitung nannte setzeTimeout() optional,
+//     obwohl sie in jeder vendorten Fassung der Reihe steht. Wer
+//     etwas zusagt, haelt es auch - sonst ersetzt eine ungepruefte
+//     Angabe die andere.
+//
+//     GEMESSEN AM ECHTEN OBJEKT, nicht an der README: Die Liste dort
+//     ist die Behauptung, diese Pruefung die Messung.
+$zugesagt = ['setzeTimeout', 'setzeKopfzeile', 'jwtDaten', 'jwtScopes',
+             'post', 'postMultipart', 'empfaengerSuchen',
+             'listeAufloesen'];
+$fehlend = [];
+foreach ($zugesagt as $m) {
+    if (!is_callable([$restProbe, $m])) $fehlend[] = $m;
+}
+pruefe($fehlend === [],
+    'die acht zugesagten Methoden sind öffentlich aufrufbar'
+    . ($fehlend ? ' – nicht: ' . implode(', ', $fehlend) : ''));
+// UND DIE README NENNT GENAU DIESE. Steht dort eine, die es nicht
+// gibt, oder fehlt eine, faellt es hier auf - nicht erst beim
+// naechsten Projekt, das sich darauf verlaesst.
+$zusage = '';
+if (preg_match('/^### Was `WebUntisRest` seit dem Rückfluss führt.*?(?=^#)/ms',
+               $readme, $mz)) {
+    $zusage = $mz[0];
+}
+pruefe($zusage !== '', 'README: die Zusage steht da');
+$ungenannt = [];
+foreach ($zugesagt as $m) {
+    if (!str_contains($zusage, '`' . $m . '()`')) $ungenannt[] = $m;
+}
+pruefe($zusage !== '' && $ungenannt === [],
+    'README: sie nennt alle acht'
+    . ($ungenannt ? ' – nicht: ' . implode(', ', $ungenannt) : ''));
+// UND SIE DATIERT NACH DEM CODE, nicht nach dem Commit-Titel: In
+// v1.3.0 stand setzeTimeout() nur in einer Anleitungsdatei.
+pruefe(str_contains($zusage, '25.08.2026') && str_contains($zusage, '6cd8afd'),
+    'README: die Zusage nennt Datum und Commit des Rückflusses');
+pruefe(str_contains($zusage, 'Anleitungsdatei'),
+    'README: und warnt vor der Nummer aus dem Commit-Titel');
 
 // ------------------------------------------------------------
 echo "\n" . ($fehler === 0 ? 'ALLE TESTS BESTANDEN' : "$fehler TEST(S) FEHLGESCHLAGEN") . "\n";
