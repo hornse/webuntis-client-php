@@ -1,13 +1,22 @@
 # webuntis-client-php
 
-**Version 1.7.0** · GPL-3.0-or-later
+**Version 2.0.0** (Tag `v2.0.0`) · GPL-3.0-or-later
+
+> Die Nummern 1.1.0 bis 1.7.0 aus früheren Commit-Titeln und Kopfvermerken
+> waren nie getaggt. `v2.0.0` ist der **erste Tag** und enthält alles, was
+> sie bezeichneten – siehe `CHANGELOG.md`. Es ist die 2, weil „1.0.0“
+> schon den Stand vom 17.07.2026 bezeichnet, und weil der Stand
+> gegenüber den Kopien in den Projekten nicht rückwärtsverträglich ist.
 
 Framework-freier PHP-Client (PHP 8.1+, nur cURL) für WebUntis:
 
 - **`WebUntisAuth`** – offizielle **JSON-RPC-API** (`/WebUntis/jsonrpc.do`):
-  authenticate, getTeachers, getSubjects, getRooms, getTimetable, logout.
+  authenticate, getTeachers, getSubjects, getRooms, getKlassen,
+  getSchoolyears, getCurrentSchoolyear, getTimetable, logout.
   Inklusive der bekannten Fallstricke (JSESSIONID-Weitergabe, personType 16
-  mit personId = -1).
+  mit personId = -1, kein aktives Schuljahr im Sommer).
+  **Keine Schülerliste:** `getStudents()` ist personenbezogen und steht
+  absichtlich nicht im Modul.
 - **`WebUntisRest`** – **interne REST-API** (⚠️ undokumentiert): JWT via
   `/api/token/new`, Bearer-Aufrufe auf `/api/rest/view/v1/...` und den
   Legacy-Endpunkt `/api/public/timetable/weekly/data`. `get()`, `post()`,
@@ -15,7 +24,13 @@ Framework-freier PHP-Client (PHP 8.1+, nur cURL) für WebUntis:
   `setzeKopfzeile($name, $wert)` (z. B. für
   `X-Webuntis-Api-School-Year-Id`, siehe Tabelle unten).
 - **`src/extractors.php`** – Auswertungsfunktionen, u. a. „welche Lehrkraft
-  unterrichtet welches Fach" aus Stundenplan-Antworten.
+  unterrichtet welches Fach" aus Stundenplan-Antworten
+  (`rest_unterricht_aus_entries`, `rest_erster_eintrag`,
+  `rest_paare_aus_weekly`), „welche Lehrkräfte unterrichten dieses Kind"
+  (`rest_lehrkraefte_aus_entries($json, bool $mitKlausuren = true)`) und
+  die Konto-Eckdaten aus `app/data` (`rest_konto_aus_appdata`). Die beiden
+  letzten sind beschrieben in `docs/README_ergaenzung.md` (dort mit
+  Vermerken; sachlich gilt der Code).
 
 Entstanden für den Fachkonferenzplaner des Friedrich-Rückert-Gymnasiums
 Düsseldorf; das REST-Wissen stammt aus systematischer Sondierung einer
@@ -135,12 +150,46 @@ Aus der Sondierung gegen eine produktive Instanz (frg-dusseldorf, 07/2026):
 | `GET /api/public/timetable/weekly/data` | Legacy, stabil: `?elementType=2&elementId=<id>&date=YYYY-MM-DD&formatId=1`, eine Woche je Aufruf. Perioden unter `data.result.data.elementPeriods` mit `elements[{type,id,orgId}]` (type 2 = Lehrer, 3 = Fach); bei Vertretung steht die reguläre Lehrkraft in `orgId`. |
 | Schuljahresabhängige Pfade (z. B. `/v1/students`) | Die Weboberfläche schickt bei jedem Stundenplanaufruf `X-Webuntis-Api-School-Year-Id` mit. Zwischen zwei Schuljahren ist keines aktiv (`currentSchoolYear: null`); ohne die Kopfzeile bricht die Auswertung solcher Pfade dann ab. Setzbar über `setzeKopfzeile()`. Belegt am 18.08.2026. |
 
+### Mitteilungen versenden
+
+**Gemessen ist multipart**, nicht ein JSON-Body: Die Oberfläche schickt
+das JSON als Datei-Teil `request` einer Multipart-Nachricht.
+`postMultipart()` baut genau das.
+
+| Datum | Weg | Beleg |
+|---|---|---|
+| 24.07.2026 | `postMultipart('/WebUntis/api/rest/view/v2/messages/users', [… 'recipientUserIds' => [<user.id>] …])` – an Konten | Mitschnitt der Oberfläche, `sprechtag` |
+| 06.10.2026 | `postMultipart('/WebUntis/api/rest/view/v2/messages', …)` | Messung `lernzeiten` |
+| 09.10.2026 | `/v2/messages` mit `recipientOption: PARENTS` → 200, im Elternpostfach angekommen; derselbe Körper an `/v2/messages/users` → 500 | `koordination` M48 |
+
+Adressiert wird an `/v2/messages/users` die **`user.id`** (aus `app/data`,
+siehe `rest_konto_aus_appdata()`), nicht die `personId`. `PARENTS` geht
+nur über eine Lehrkraft-Sitzung; das Admin-Konto bekommt 403 (M48).
+
+**Der früher dokumentierte Weg – `post()` mit JSON-Body an
+`/v1/messages` – ist nirgends als gesendet belegt.** Er steht als
+ÜBERHOLT gekennzeichnet in `docs/README_ergaenzung.md`.
+
+**Ob ein Konto senden darf, sagt nicht der JWT-Scope** (`mg:r` trägt
+auch die Oberfläche, die sendet), sondern
+`GET /WebUntis/api/rest/view/v1/messages/permissions`.
+
+Keine dieser Messungen trägt die WebUntis-Version.
+
 ## Tests
 
 ```bash
-php tests/run.php               # offline, keine Instanz nötig
-php tests/webuntis_rest_test.php  # offline, prüft setzeKopfzeile()
+bash tests/alle.sh    # ALLE Testdateien, jede einzeln; offline
 ```
+
+Das Skript ermittelt die Testdateien selbst (jede `tests/*.php`) – eine
+neue läuft mit, ohne dass hier etwas ergänzt wird. Rot ist ein
+Exit-Code ungleich 0, eine Datei ohne erkennbare Prüfung und ein leeres
+Verzeichnis. Bis v2.0.0 nannte diese Stelle nur die grünen Dateien, und
+zwei rote blieben sechs Wochen unbemerkt.
+
+`tests/webuntis_auth_test.php` startet selbst einen lokalen PHP-Server
+(`php -S`) und prüft `WebUntisAuth` über das echte `rpc()`.
 
 ## Lizenz
 

@@ -1,5 +1,15 @@
 # Änderungen am webuntis-client-php – Übersicht
 
+> **ÜBERHOLT seit v2.0.0 (12.10.2026).** Diese Anleitung wurde erst mit
+> v2.0.0 ausgeführt, und nicht vollständig: `getStudents()` ist
+> **absichtlich nicht** übernommen (personenbezogen, REIHENREGELN 9), und
+> `getCurrentSchoolyear()` fängt nur noch -8998. Der Tag `v1.6.0` aus
+> Schritt 6 wurde nie gesetzt; der erste Tag dieses Repos ist `v2.0.0`
+> (siehe `CHANGELOG.md`). Die Ergänzungsdateien liegen seitdem nicht mehr
+> in `src/`: die beiden PHP-Dateien sind in `src/extractors.php`
+> aufgegangen, die beiden Anleitungen liegen unter `docs/`. Der Text
+> unten bleibt als damaliger Stand stehen.
+
 Alle Änderungen, die aus dem Projekt `sprechtag` ins Modul-Repository
 zurückfließen sollen. Stand: 24.07.2026, Zielversion **1.6.0**.
 

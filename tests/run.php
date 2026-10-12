@@ -190,5 +190,100 @@ pruefe(str_contains($zusage, 'Anleitungsdatei'),
     'README: und warnt vor der Nummer aus dem Commit-Titel');
 
 // ------------------------------------------------------------
+// 5. Zusammenführung v2.0.0 (Auftrag webuntis-client-zusammenfuehren,
+//    hornse/koordination, 12.10.2026)
+// ------------------------------------------------------------
+
+// 5a. Kein Funktionsname zweimal im Code des Moduls. Bis v2.0.0 lagen
+//     rest_lehrkraefte_aus_entries() und rest_konto_aus_appdata() in
+//     zwei Ergänzungsdateien neben src/extractors.php; wer beide lädt,
+//     bekommt einen Fatal. Gezählt werden globale Funktionen
+//     (Klammertiefe 0) - Methoden gehören ihrer Klasse.
+$deklariert = [];
+foreach (glob(__DIR__ . '/../src/*.php') ?: [] as $datei) {
+    $tokens = token_get_all((string)file_get_contents($datei));
+    $tiefe = 0;
+    foreach ($tokens as $i => $t) {
+        if ($t === '{' || (is_array($t) && in_array($t[0], [T_CURLY_OPEN, T_DOLLAR_OPEN_CURLY_BRACES], true))) $tiefe++;
+        if ($t === '}') $tiefe--;
+        if ($tiefe === 0 && is_array($t) && $t[0] === T_FUNCTION) {
+            $j = $i + 1;
+            while (is_array($tokens[$j]) && $tokens[$j][0] === T_WHITESPACE) $j++;
+            if (is_array($tokens[$j]) && $tokens[$j][0] === T_STRING) {
+                $deklariert[strtolower($tokens[$j][1])][] = basename($datei);
+            }
+        }
+    }
+}
+$doppelt = array_filter($deklariert, fn($orte) => count($orte) > 1);
+pruefe(count($deklariert) > 0 && $doppelt === [],
+    'kein Funktionsname zweimal in src/ (' . count($deklariert) . ' Funktionen)'
+    . ($doppelt ? ' – doppelt: ' . implode(', ', array_keys($doppelt)) : ''));
+
+// 5b. Die Schülerabfrage steht NICHT im Modul (REIHENREGELN 9: ein
+//     personenbezogener Endpunkt gehört nicht in Anwendungen, die ihn
+//     nicht brauchen - und das Modul wird in alle verteilt).
+//     Gesucht wird im CODE: Kommentare dürfen erklären, warum sie
+//     fehlt. ZEICHENKETTEN zählen hier mit, denn rpc('getStudents')
+//     ist genau der Aufruf, um den es geht.
+function schuelerabfrage_im_code(string $quelle): array {
+    $treffer = [];
+    foreach (token_get_all($quelle) as $t) {
+        if (!is_array($t) || in_array($t[0], [T_COMMENT, T_DOC_COMMENT], true)) continue;
+        if (in_array($t[0], [T_STRING, T_CONSTANT_ENCAPSED_STRING, T_ENCAPSED_AND_WHITESPACE], true)
+            && stripos($t[1], 'getstudents') !== false) {
+            $treffer[] = $t[2];
+        }
+    }
+    return $treffer;
+}
+$funde = [];
+foreach ($codeDateien as $datei) {
+    foreach (schuelerabfrage_im_code((string)file_get_contents($datei)) as $z) {
+        $funde[] = basename($datei) . ':' . $z;
+    }
+}
+pruefe($funde === [], 'keine Schülerabfrage (getStudents) im Code des Moduls'
+    . ($funde ? ' – gefunden: ' . implode(', ', $funde) : ''));
+pruefe(schuelerabfrage_im_code("<?php\nclass X { function f() { return \$this->rpc('getStudents'); } }") === [2],
+    'GEGENPROBE: der Aufruf als Zeichenkette wird gefunden');
+pruefe(schuelerabfrage_im_code("<?php\n// getStudents fehlt absichtlich\n/** getStudents() */\n") === [],
+    'GEGENPROBE: ein Kommentar über getStudents wird nicht gefunden');
+
+// 5c. Die widerlegte Deutung des Rechtefeldes. Bis v2.0.0 stand am
+//     JWT: „mg:r" bedeute nur Lesen, ohne Schreibrecht scheitere der
+//     Versand mit 403. Widerlegt am 06./07.10.2026 (sprechtag E1): Die
+//     Oberfläche trägt denselben Scope und sendet; maßgeblich ist
+//     /v1/messages/permissions. Gesucht wird ausdrücklich die FALSCHE
+//     Fassung - und dass die richtige dasteht.
+$restQuelle = (string)file_get_contents(__DIR__ . '/../src/WebUntisRest.php');
+pruefe(!str_contains($restQuelle, 'bedeutet nur LESEN')
+       && !str_contains($restQuelle, 'Ohne Schreibrecht scheitert'),
+    'WebUntisRest: die widerlegte Scope-Deutung steht nicht mehr da');
+pruefe(str_contains($restQuelle, '/WebUntis/api/rest/view/v1/messages/permissions'),
+    'WebUntisRest: der Kommentar nennt die maßgebliche Quelle (messages/permissions)');
+
+// 5d. Der Versandweg in der Doku. Gemessen ist multipart; der JSON-Weg
+//     an /v1/messages ist nirgends als gesendet belegt. Die README
+//     nennt den gemessenen Weg mit Datum; die Ergänzungsdoku behält
+//     den alten Satz, aber als ÜBERHOLT gekennzeichnet - und zwar VOR
+//     dem Beispiel, nicht irgendwo in der Datei.
+$versand = '';
+if (preg_match('/^### Mitteilungen versenden\b.*?(?=^## )/ms', $readme, $mv)) {
+    $versand = $mv[0];
+}
+pruefe($versand !== '' && str_contains($versand, 'postMultipart(')
+       && str_contains($versand, '/v2/messages/users') && str_contains($versand, '24.07.2026'),
+    'README: Abschnitt „Mitteilungen versenden" nennt den gemessenen Weg mit Datum');
+$ergaenzungPfad = __DIR__ . '/../docs/README_ergaenzung.md';
+$ergaenzung = is_file($ergaenzungPfad) ? (string)file_get_contents($ergaenzungPfad) : '';
+$beispiel = strpos($ergaenzung, "\$rest->post('/WebUntis/api/rest/view/v1/messages'");
+$abschnittsAnfang = $beispiel === false ? false : strrpos(substr($ergaenzung, 0, $beispiel), "\n### ");
+$davor = ($beispiel === false || $abschnittsAnfang === false)
+    ? '' : substr($ergaenzung, $abschnittsAnfang, $beispiel - $abschnittsAnfang);
+pruefe($beispiel !== false && str_contains($davor, 'ÜBERHOLT'),
+    'Ergänzungsdoku: das JSON-Beispiel an /v1/messages steht noch da, als ÜBERHOLT gekennzeichnet');
+
+// ------------------------------------------------------------
 echo "\n" . ($fehler === 0 ? 'ALLE TESTS BESTANDEN' : "$fehler TEST(S) FEHLGESCHLAGEN") . "\n";
 exit($fehler === 0 ? 0 : 1);

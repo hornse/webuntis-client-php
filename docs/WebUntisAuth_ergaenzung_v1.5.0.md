@@ -5,6 +5,18 @@ hinter `getRooms()`.
 
 > Anleitung, kein lauffähiges PHP – die Blöcke sind Klassen-Member.
 
+> **ÜBERHOLT seit v2.0.0 (12.10.2026).** Bis dahin lag diese Datei in
+> `src/`. Übernommen sind `getKlassen()`, `getSchoolyears()` und
+> `getCurrentSchoolyear()` – letztere **berichtigt**: Der `catch` unten
+> fängt jede `RuntimeException`, obwohl der Kommentar nur -8998 nennt;
+> damit sah ein Netzfehler aus wie „kein Schuljahr aktiv". **Nicht
+> übernommen ist `getStudents()`** (personenbezogen, REIHENREGELN 9).
+> **„v1.4.0" gibt es in der Historie dieses Repos nicht** – kein Commit,
+> keine Datei; die Methoden kamen erst mit dieser Anleitung (2b6838a,
+> 24.07.2026) herein. Die Feldbeschreibung von `getStudents()` unten
+> widerspricht der in `docs/CHANGELOG_ergaenzung.md` (zweiter
+> v1.4.0-Eintrag) – keine der beiden ist hier geprüft.
+
 ---
 
 ## v1.4.0 – Klassen und Schüler:innen

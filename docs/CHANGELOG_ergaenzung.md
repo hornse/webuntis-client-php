@@ -2,6 +2,12 @@
 
 Diese Einträge oben in die bestehende `CHANGELOG.md` einfügen.
 
+> **ÜBERHOLT seit v2.0.0 (12.10.2026).** Diese Einträge sind nie in
+> `CHANGELOG.md` eingegangen, und keine der Nummern 1.2.0–1.6.0 wurde
+> getaggt. Was sie bedeuteten, steht in `CHANGELOG.md` unter `[2.0.0]`.
+> Diese Datei bleibt als damaliger Stand stehen; wo sie sachlich falsch
+> ist, steht ein Vermerk an der Stelle.
+
 ---
 
 ## v1.6.0 (Juli 2026)
@@ -57,6 +63,15 @@ explizit übergeben.
 
 ## v1.4.0 (Juli 2026)
 
+> **Vermerk (v2.0.0):** Diesen Abschnitt gibt es **zweimal**, mit zwei
+> verschiedenen Feldbeschreibungen von `getStudents()` – hier „nur id,
+> key, name, foreName, longName, gender", unten „id, key, name,
+> foreName, longName und je nach Instanz weitere". Welche zutrifft, ist
+> hier nicht geprüft; die Befundliste in `hornse/koordination`
+> (11.10.2026, Abschnitt 4) führt weitere Fassungen. Eine Version 1.4.0
+> gibt es in der Historie dieses Repos nicht. `getStudents()` steht seit
+> v2.0.0 absichtlich nicht im Modul.
+
 ### Neu
 - `WebUntisAuth::getKlassen()` – alle Klassen.
 - `WebUntisAuth::getStudents()` – alle Schüler:innen.
@@ -96,6 +111,12 @@ nicht in Logs oder Diagnoseberichte schreiben.
   in Folge, die sonst in das Proxy-Limit des Webservers laufen.
 
 ### Hinweis
+
+> **ÜBERHOLT (v2.0.0):** „Gedacht für Endpunkte wie den Versand von
+> Mitteilungen" ist widerlegt – Mitteilungen gehen multipart
+> (`postMultipart()`), belegt am 24.07., 06.10. und 09.10.2026. Siehe
+> `README.md`, „Mitteilungen versenden".
+
 Der POST-Weg der internen REST-API ist **nicht dokumentiert**. Die
 erwartete Feldstruktur wurde nicht verifiziert. Aufrufer sollten mehrere
 Strukturen probieren, den Status auswerten und einen Fallback vorsehen.

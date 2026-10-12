@@ -2,6 +2,10 @@
 
 Diese Abschnitte in die bestehende `README.md` einfügen.
 
+> **ÜBERHOLT seit v2.0.0 (12.10.2026).** Der gültige Stand steht in
+> `README.md`. Diese Datei bleibt als damaliger Stand stehen; wo sie
+> sachlich falsch ist, steht ein Vermerk an der Stelle.
+
 ---
 
 ## In den Abschnitt „Extraktoren" ergänzen
@@ -49,6 +53,10 @@ regulärem Unterricht erhalten bleibt. Wo Aufsichten fachfremd verteilt
 werden, mit `false` abschalten.
 
 **Filterregeln** (identisch zu `rest_unterricht_aus_entries()`):
+
+> **Berichtigt (v2.0.0):** „und `EXAM` aus" gilt seit dem Parameter
+> `$mitKlausuren` (Absatz oben) nur noch mit `false`; in der
+> Voreinstellung wird `EXAM` mit Status `REGULAR` gewertet.
 
 * nur Einträge, deren `type` `TEACHING` enthält – schließt
   `BREAK_SUPERVISION` (Pausenaufsicht), `EVENT` (Wandertag) und `EXAM` aus
@@ -110,6 +118,12 @@ verworfen.
 
 ### `getKlassen(): array` und `getStudents(): array` *(ab v1.4.0)*
 
+> **Berichtigt (v2.0.0):** Eine Version 1.4.0 gibt es in der Historie
+> dieses Repos nicht; die Methoden kamen mit der Anleitung vom
+> 24.07.2026 (2b6838a). `getKlassen()` steht seit v2.0.0 im Modul, mit
+> optionaler `schoolyearId`. **`getStudents()` steht absichtlich nicht
+> im Modul** (personenbezogen, REIHENREGELN 9).
+
 Stammdaten-Abrufe über JSON-RPC, analog zu `getTeachers()`:
 
 ```php
@@ -127,6 +141,23 @@ $schueler = $wu->getStudents();   // [['id'=>13914,'name'=>…, …], …]
 ## In den Abschnitt „WebUntisRest" ergänzen
 
 ### `post(string $pfad, array $daten): array` *(ab v1.3.0)*
+
+> **ÜBERHOLT – der Versandweg unten ist widerlegt (v2.0.0, 12.10.2026).**
+> Das Beispiel schickt eine Mitteilung als JSON-Body an `/v1/messages`.
+> Dieser Weg ist **nirgends als gesendet belegt**; er wurde am 23.07.2026
+> aufgeschrieben, einen Tag **vor** dem Mitschnitt, der ihn widerlegt,
+> und der Changelog nannte ihn selbst „nicht verifiziert". **Gemessen
+> ist multipart** – ein Teil `request` mit dem JSON:
+>
+> | Datum | Pfad | Beleg |
+> |---|---|---|
+> | 24.07.2026 | `/v2/messages/users`, `recipientUserIds` | Mitschnitt der Oberfläche, `sprechtag` |
+> | 06.10.2026 | `/v2/messages` | Messung `lernzeiten` |
+> | 09.10.2026 | `/v2/messages` mit `recipientOption: PARENTS` → 200, angekommen; `/v2/messages/users` damit → 500 | `koordination` M48 |
+>
+> Gültig ist `README.md`, Abschnitt „Mitteilungen versenden". `post()`
+> selbst bleibt richtig – für Endpunkte, die JSON erwarten, etwa die
+> Empfängersuche. Der alte Text folgt unverändert.
 
 Schreibender Zugriff mit JSON-Body. Rückgabe wie bei `get()`:
 `['status', 'contentType', 'text', 'json']`.

@@ -45,7 +45,8 @@ und wird in die Anwendungen **vendored** — kopiert, nicht eingebunden.
 |---|---|
 | Inhalt | `src/WebUntisRest.php`, `src/WebUntisAuth.php`, `src/extractors.php` |
 | Remote | `github` → **`hornse/webuntis-client-php`** |
-| Testskripte | vier Dateien in `tests/`, **zwei davon rot** — siehe „Was offen ist" |
+| Testskripte | `bash tests/alle.sh` startet **alle** `tests/*.php`, jede einzeln (seit v2.0.0) |
+| Tags | ab `v2.0.0` (12.10.2026); die Nummern 1.x davor sind nie getaggt, siehe `CHANGELOG.md` |
 | Lizenz | GPL-3.0-or-later |
 
 ## Der Verzeichnisname weicht vom Repo-Namen ab
@@ -57,38 +58,23 @@ Repo-Namen schließt, liegt hier falsch — der Bestandslauf löst deshalb
 
 ## Was offen ist
 
-**Zwei der vier Testdateien sind rot, und zwar seit sie aufgenommen
-wurden.** Stand 24.09.2026, jede Datei einzeln mit `php` aufgerufen:
+**Die Verteilung von v2.0.0 in die Projekte steht aus.** Zusammengeführt
+ist im Modul (12.10.2026); die Kopien in den Projekten sind unverändert,
+und der Bestandslauf meldet deshalb weiter fünf Kopien, die keinem Stand
+dieser Historie entsprechen (`WebUntisAuth` in lernzeiten, signage,
+sprechtag; `extractors.php` in lernzeiten, sprechtag). Die Verteilung ist
+ein eigener Auftrag. Was sie je Projekt ändert, steht im Bericht des
+Zusammenführungslaufs (`docs/BERICHT-2026-10-12-zusammenfuehrung.md`).
 
-| Datei | Ergebnis |
-|---|---|
-| `tests/run.php` | grün (18 Prüfungen) |
-| `tests/webuntis_rest_test.php` | grün (8 Prüfungen) |
-| `tests/extractors_lehrkraefte_test.php` | **rot**: Fatal, `rest_lehrkraefte_aus_entries()` undefiniert |
-| `tests/extractors_klausuren_test.php` | **rot**: dito |
+**Die Schülerabfrage `getStudents()` steht absichtlich nicht im Modul**
+(personenbezogen, REIHENREGELN 9). Die Kopien von `WebUntisAuth` in
+lernzeiten, signage und sprechtag führen sie; nur die Sondierung in
+sprechtag ruft sie. Wer verteilt, muss das dort klären.
 
-Die Funktion steht nur in den Ergänzungsdateien und nicht in
-`src/extractors.php`. Die Tests sind hereingekommen, der Code nicht.
-**Die roten Tests werden nicht einzeln repariert.** Sie gehören zur
-Zusammenführung von `WebUntisAuth` und `extractors.php` (unten).
-**Kein Skript lässt alle vier laufen**, und die README nennt nur die
-beiden grünen. Wer nur „die Tests" laufen lässt, sieht deshalb grün.
-Befund: `hornse/koordination`, `docs/BEFUND-2026-09-24-webuntis-holen.md`.
-
-**Dieses Repo führt keine Tags.** Ein Rückstand einer Kopie lässt sich
-deshalb nur auf ein **Datum** beziehen, nicht auf eine Versionsnummer.
-Erschwerend: Die Nummern in den Commit-Meldungen dieses Repos passen
-nachweislich nicht durchgängig zum Inhalt. Tags nachzutragen ist hier
-schwieriger als bei `ci-css` und ein eigener Vorgang.
-
-**`src/` enthält Ergänzungsdateien** (`*_ergaenzung_v*.php`, `.md`) neben
-den eigentlichen Quelldateien. Sie liegen im selben Verzeichnis und
-werden dadurch vom Bestandslauf als Moduldateien mitgeführt.
-
-**`WebUntisAuth` und `extractors.php` sind in mehreren Anwendungen
-auseinandergelaufen.** Das ist belegt, nicht vermutet: Der Bestandslauf
-meldet fünf Kopien, die keinem Stand dieser Historie entsprechen. Die
-Zusammenführung ist ein eigener Vorgang — nicht in einem Rutsch.
+**Die Nummern 1.x sind Behauptungen.** Sie stehen in Commit-Titeln,
+Kopfvermerken und Dateinamen, nie als Tag. Was sie bezeichnet haben,
+steht in `CHANGELOG.md` unter `[2.0.0]`. „1.0.0" bezeichnet den Stand vom
+17.07.2026 — deshalb heißt der erste Tag `v2.0.0`.
 
 **`WebUntisAuth` gibt es zweimal in der Reihe.** Auch
 `hornse/webuntis-auth-php` deklariert eine Klasse dieses Namens im

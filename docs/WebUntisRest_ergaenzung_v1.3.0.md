@@ -6,6 +6,14 @@ Drei Eingriffe, alle unten im Volltext.
 > Diese Datei ist eine Anleitung, kein lauffähiges PHP – die Code-Blöcke
 > sind Klassen-Member und gehören in die bestehende Klasse.
 
+> **ÜBERHOLT seit dem 25.08.2026** (6cd8afd): `setzeTimeout()` und
+> `post()` stehen seitdem im Code, `post()` in anderer Form. Bis v2.0.0
+> lag diese Datei in `src/`. **Der Versandweg unten ist widerlegt:**
+> Mitteilungen gehen **nicht** als JSON-Body an `/v1/messages`, sondern
+> multipart an `/v2/messages/users` bzw. `/v2/messages` – siehe
+> `README.md`, Abschnitt „Mitteilungen versenden". Der Text unten bleibt
+> als damaliger Stand stehen.
+
 ---
 
 ## (A) Timeout konfigurierbar machen

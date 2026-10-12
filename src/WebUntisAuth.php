@@ -49,6 +49,54 @@ class WebUntisAuth
     public function getSubjects(): array { return $this->rpc('getSubjects'); }
     public function getRooms(): array    { return $this->rpc('getRooms'); }
 
+    // Die drei folgenden Abfragen sind in v2.0.0 aus der Anleitung
+    // docs/WebUntisAuth_ergaenzung_v1.5.0.md übernommen.
+    //
+    // NICHT übernommen ist getStudents(): Die Schülerliste ist
+    // personenbezogen, und das Modul wird in jede Anwendung verteilt –
+    // auch in die, die sie nicht brauchen (REIHENREGELN 9). Wer sie
+    // braucht, ruft sie in der eigenen Anwendung.
+
+    /**
+     * Alle Klassen. Ohne Parameter bezieht sich der Aufruf auf das
+     * AKTUELLE Schuljahr; zwischen zwei Schuljahren gibt es keines, und
+     * WebUntis antwortet mit -8998 („schoolyear is null“, gemessen im
+     * Sommer 2026). Dann eine schoolyearId aus getSchoolyears() übergeben.
+     */
+    public function getKlassen(?int $schoolyearId = null): array
+    {
+        return $this->rpc('getKlassen',
+            $schoolyearId === null ? [] : ['schoolyearId' => $schoolyearId]);
+    }
+
+    /** Alle Schuljahre mit id, name, startDate, endDate. */
+    public function getSchoolyears(): array { return $this->rpc('getSchoolYears'); }
+
+    /**
+     * Aktuelles Schuljahr, oder [] wenn keines aktiv ist.
+     *
+     * [] heißt NUR „kein Schuljahr aktiv“: das Ergebnis null oder der
+     * Fehler -8998. Jeder andere Fehler – nicht erreichbar, kein JSON,
+     * Sitzung abgelaufen, ein anderer Fehlercode – wird weitergereicht.
+     * Bis v2.0.0 fing die Anleitung jede RuntimeException, und ein
+     * Netzfehler sah aus wie die Sommerferien.
+     *
+     * Nicht gemessen ist, welche der beiden Formen getCurrentSchoolyear
+     * selbst zwischen zwei Schuljahren liefert; beide ergeben [].
+     */
+    public function getCurrentSchoolyear(): array
+    {
+        try {
+            $r = $this->rpc('getCurrentSchoolyear');
+        } catch (RuntimeException $e) {
+            if ($e->getCode() === -8998) {
+                return [];
+            }
+            throw $e;
+        }
+        return is_array($r) ? $r : [];
+    }
+
     /** JSESSIONID-Cookie der laufenden Session (für die interne REST-API). */
     public function sessionCookie(): ?string { return $this->sessionCookie; }
 
