@@ -298,4 +298,29 @@ weil sie abbricht statt zu lügen; danach mit `---` getrennt.
 
 ## Nachtrag nach dem Taggen
 
-*(wird nach `git tag` ergänzt)*
+**Der Tag sitzt richtig.** `v2.0.0` (annotiert) zeigt auf `5f84f4a`;
+`git show v2.0.0:CHANGELOG.md` führt in Zeile 3 `## [2.0.0] – 12.10.2026`.
+`git show --stat v2.0.0`: 17 Dateien, 1156 Zeilen hinzu, 327 entfernt.
+Auf dem getaggten Stand, in einem eigenen Worktree ausgeführt:
+`bash tests/alle.sh` → 6 Dateien, 111 Prüfungen, 0 rot, Exit 0.
+
+**Commits dieses Laufs:**
+
+| Commit | Inhalt | Prüfungen auf diesem Stand (je im eigenen Worktree gemessen) |
+|---|---|---|
+| `0a5b7e5` | `tests/alle.sh`, `tests/sammelskript_test.php` | 41 grün, die beiden Extraktor-Suiten Fatal, `alle.sh` meldet sie rot |
+| `5f84f4a` (Tag `v2.0.0`) | Zusammenführung, Prüfungen, Doku, Changelog, dieser Bericht | 111 grün |
+| der Commit mit diesem Nachtrag | nur dieser Abschnitt | unverändert |
+
+**Ein Fehler beim Committen, behoben vor dem Taggen:** Der erste Commit
+von Paket 1 (`59a11ac`, verworfen) nahm mehr mit als die beiden
+genannten Dateien — `git rm` und `git mv` hatten die Löschung der
+Ergänzungsdateien und die Verschiebung der Anleitungen schon in den
+Index gelegt, und `git commit` ohne Pfadangabe schreibt den ganzen
+Index. Auf diesem Stand hätten die beiden Extraktor-Funktionen
+**nirgends** gestanden, und die Commit-Meldung hätte etwas anderes
+behauptet. Gefunden mit `git show --stat` direkt danach; zurückgenommen
+mit `git reset --soft HEAD~1` (lokal, nie gepusht), neu committet mit
+Pfadangabe. **Die Regel „namentlich addieren" reicht nicht, wenn der
+Index schon etwas trägt** — `git status --short` vor dem Commit hätte es
+gezeigt; ich habe es erst danach gelesen.
